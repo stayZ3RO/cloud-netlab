@@ -2,13 +2,13 @@
 
 Reusable AWS VPC building block: VPC, public + private subnets across AZs, an internet gateway, a public route table, and a baseline (deny-inbound / allow-egress) security group.
 
-Written as a module — not copy-pasted HCL — so `environments/dev` (and a future `environments/prod`) consume the same code with different inputs. That's the "reusable module design" the role asks for and the thing my Proxmox homelab IaC didn't yet demonstrate.
+Written as a module, not copy-pasted HCL, so `environments/dev` (and a future `environments/prod`) consume the same code with different inputs. That's the "reusable module design" the role asks for and the thing my Proxmox homelab IaC didn't yet demonstrate.
 
 ## Inputs
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `name` | string | — | Name prefix for all resources |
+| `name` | string | (none) | Name prefix for all resources |
 | `vpc_cidr` | string | `10.30.0.0/16` | VPC CIDR |
 | `azs` | list(string) | `["us-east-1a","us-east-1b"]` | AZs to spread across |
 | `public_subnet_cidrs` | list(string) | two /24s | Public subnet CIDRs (one per AZ) |

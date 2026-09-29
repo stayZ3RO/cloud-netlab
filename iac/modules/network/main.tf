@@ -1,5 +1,5 @@
 # Networking-as-code: a VPC with public/private subnets, routing, and a
-# baseline security group. Homelab analogy in comments — the same concepts I
+# baseline security group. Homelab analogy in comments: the same concepts I
 # already run on-prem (VLANs, subnets, firewall rules), expressed as AWS code.
 
 locals {

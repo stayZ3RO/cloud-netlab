@@ -50,7 +50,7 @@ def test_detects_missing_and_unexpected_subnets():
 
 
 def test_host_bit_difference_is_not_drift():
-    # Same network, cosmetic host-bit difference — must NOT be flagged.
+    # Same network, cosmetic host-bit difference, must NOT be flagged.
     desired = {"subnets": ["10.30.0.0/24"]}
     actual = {"subnets": ["10.30.0.7/24"]}
     assert not netdrift.compare(desired, actual).has_drift

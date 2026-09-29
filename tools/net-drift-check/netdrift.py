@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""net-drift-check — compare a desired network state to an actual one.
+"""net-drift-check: compare a desired network state to an actual one.
 
 Reads two YAML documents describing subnets, DNS records, and optional
 security-group rules; reports any drift between them; and exits non-zero when

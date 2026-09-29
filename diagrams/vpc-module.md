@@ -6,7 +6,7 @@ state matches the Terraform declaration.
 
 ```mermaid
 flowchart TB
-    subgraph VPC["VPC — 10.0.0.0/16 (var.vpc_cidr)"]
+    subgraph VPC["VPC: 10.0.0.0/16 (var.vpc_cidr)"]
         IGW["Internet Gateway"]
         subgraph AZA["AZ-a"]
             PUBA["public subnet"]
@@ -27,7 +27,7 @@ flowchart TB
         RTPRV -. assoc .- PRVB
     end
 
-    DRIFT["drift-check CLI — Python<br/>reads live VPC state via boto3<br/>diffs vs Terraform-declared state<br/>exits non-zero on drift<br/>101 pytest cases · runs in CI"]
+    DRIFT["drift-check CLI: Python<br/>reads live VPC state via boto3<br/>diffs vs Terraform-declared state<br/>exits non-zero on drift<br/>101 pytest cases · runs in CI"]
     DRIFT -. inspects .-> VPC
 
     classDef aws fill:#1f2937,stroke:#f59e0b,color:#fde68a
@@ -40,5 +40,5 @@ flowchart TB
 
 **OpenTofu / Terraform · consumed by `environments/dev` · no cloud
 resources applied.** Subnet count is driven by the `azs` /
-`public_subnet_cidrs` / `private_subnet_cidrs` variables — two AZs shown
+`public_subnet_cidrs` / `private_subnet_cidrs` variables, two AZs shown
 here is the `dev` default, not a module limit.

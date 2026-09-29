@@ -8,7 +8,7 @@ terraform {
     }
   }
 
-  # Remote state — the next step past local state. Stub kept visible on purpose:
+  # Remote state, the next step past local state. Stub kept visible on purpose:
   # create the bucket + lock table, then uncomment to use S3-backed locked state.
   #
   # backend "s3" {

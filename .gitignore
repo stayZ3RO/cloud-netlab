@@ -7,7 +7,7 @@ crash.log
 crash.*.log
 *.tfplan
 
-# Real variable values — never commit; only *.example is tracked
+# Real variable values, never commit; only *.example is tracked
 *.tfvars
 !*.tfvars.example
 
