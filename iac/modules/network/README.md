@@ -21,11 +21,13 @@ Written as a module, not copy-pasted HCL, so `environments/dev` (and a future `e
 
 ## Homelab mapping
 
-| AWS resource | On-prem equivalent I already run |
-| --- | --- |
-| VPC | the routed network behind the edge firewall |
-| Internet gateway | the WAN uplink (ER605) |
-| Public subnet | DMZ VLAN |
-| Private subnet | internal VLANs |
-| Public route table | static default route out the WAN |
-| Baseline security group | default-deny firewall policy |
+The AWS resources are defined in code and have not been applied. The home network uses a UniFi UDM Pro and USW-24-PoE with a flat LAN; VLAN segmentation and inter-VLAN firewall policy remain planned.
+
+| AWS concept | Home-network counterpart | Home status |
+| --- | --- | --- |
+| VPC | Network behind the edge firewall | Current flat LAN |
+| Internet gateway | WAN uplink through the UDM Pro | Current network baseline |
+| Public subnet | DMZ VLAN | Planned segmentation |
+| Private subnet | Internal VLANs | Planned segmentation |
+| Public route table | Default route out the WAN | Current flat-network routing |
+| Baseline security group | Segmented firewall policy | Planned policy work |

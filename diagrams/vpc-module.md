@@ -1,12 +1,12 @@
 # `network` Module + Drift Check
 
-The reusable `network` module (VPC, public/private subnets across AZs, IGW,
-routing, baseline SG) and the Python drift-check CLI that verifies live
-state matches the Terraform declaration.
+The reusable `network` module defines a VPC, public/private subnets across
+availability zones, an internet gateway, public routing, and a baseline
+security group.
 
 ```mermaid
 flowchart TB
-    subgraph VPC["VPC: 10.0.0.0/16 (var.vpc_cidr)"]
+    subgraph VPC["VPC module"]
         IGW["Internet Gateway"]
         subgraph AZA["AZ-a"]
             PUBA["public subnet"]
@@ -16,27 +16,34 @@ flowchart TB
             PUBB["public subnet"]
             PRVB["private subnet"]
         end
-        RTPUB["public route table<br/>0.0.0.0/0 → IGW"]
-        RTPRV["private route table<br/>local only"]
-        SG["baseline security group<br/>deny inbound · allow egress"]
+        RTPUB["public route table<br/>default route to IGW"]
+        SG["baseline security group<br/>deny inbound / allow egress"]
 
-        IGW --- RTPUB
-        RTPUB -. assoc .- PUBA
-        RTPUB -. assoc .- PUBB
-        RTPRV -. assoc .- PRVA
-        RTPRV -. assoc .- PRVB
+        RTPUB --> IGW
+        PUBA --- RTPUB
+        PUBB --- RTPUB
     end
-
-    DRIFT["drift-check CLI: Python<br/>reads live VPC state via boto3<br/>diffs vs Terraform-declared state<br/>exits non-zero on drift<br/>101 pytest cases · runs in CI"]
-    DRIFT -. inspects .-> VPC
 
     classDef aws fill:#1f2937,stroke:#f59e0b,color:#fde68a
     classDef sub fill:#0c4a6e,stroke:#38bdf8,color:#e0f2fe
-    classDef tool fill:#166534,stroke:#4ade80,color:#dcfce7
-    class IGW,RTPUB,RTPRV,SG aws
+    class IGW,RTPUB,SG aws
     class PUBA,PUBB,PRVA,PRVB sub
-    class DRIFT tool
 ```
+
+The Python CLI compares two supplied YAML snapshots. Each describes
+subnets and DNS records, with optional security-group rules. It compares
+normalized values and emits a text or JSON drift report.
+
+```mermaid
+flowchart LR
+    DESIRED["Supplied desired YAML"] --> CLI["net-drift-check<br/>validate and compare"]
+    ACTUAL["Supplied actual YAML"] --> CLI
+    CLI --> REPORT["Text or JSON report<br/>0: no drift<br/>1: drift<br/>2: input error"]
+```
+
+The CLI reads local YAML files; it does not query AWS or read Terraform
+state. See the [CLI documentation](../tools/net-drift-check/README.md) for
+the input schema, normalization rules, and examples.
 
 **OpenTofu / Terraform · consumed by `environments/dev` · no cloud
 resources applied.** Subnet count is driven by the `azs` /

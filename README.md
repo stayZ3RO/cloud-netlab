@@ -5,15 +5,21 @@
 > - **Architecture:** a reusable `network` module (VPC, public/private subnets across AZs, IGW, routing, baseline security group) consumed by a `dev` environment; remote-state intent stubbed.
 > - **Tech:** OpenTofu/Terraform (HCL), Python, pytest, GitHub Actions.
 > - **Testing:** 101 pytest cases on the drift tool (pure logic + CLI, including security-group rule drift); `tofu validate` on the IaC.
-> - **CI:** every push/PR runs `tofu fmt -check` + `validate` and `pytest` (green).
+> - **CI:** pushes to `main` on the GitHub mirror run `tofu fmt -check` + `validate` and `pytest` (green).
 > - **Security:** no credentials/state/tfvars committed (`*.example` only); baseline SG is deny-inbound/allow-egress.
-> - **What was actually run:** Locally, `tofu fmt`, `init -backend=false`, `validate`, and the full pytest suite pass. CI runs formatting/validation checks and the pytest suite on every push and pull request. No cloud resources were applied.
+> - **What was actually run:** Locally, `tofu fmt`, `init -backend=false`, `validate`, and the full pytest suite pass. CI runs formatting/validation checks and the pytest suite on pushes to `main` on the GitHub mirror. No cloud resources were applied.
 > - **Limitations (honest):** this is a **lab**. It demonstrates AWS IaC authoring, module design, and CI-gated testing; it does **not** represent production/enterprise AWS operations, multi-account architecture, or IAM/governance at scale.
 
-AWS **networking-as-code** with a real CI gate and a small, tested Python network-automation tool. Built to close two specific, honestly-identified gaps between my homelab work and a Software Engineer II (platform / network automation) role:
+## Why this exists
 
-1. **AWS + Terraform hands-on.** My existing IaC (OpenTofu against Proxmox) proves lifecycle design and blast-radius discipline, but it isn't AWS. This repo is AWS, targeted.
-2. **Tested application code.** My other automation is Bash/utility scripting; this repo ships Python with `pytest` tests and CI, not just scripts.
+AWS **networking-as-code** with a real CI gate and a small, tested Python network-automation tool. Built to connect my homelab work with the AWS, module design, and tested automation expected in a platform / network automation role.
+
+| Gap | Evidence in this repo |
+| --- | --- |
+| AWS + Terraform hands-on beyond my Proxmox IaC | AWS-targeted OpenTofu/Terraform in `iac/`, with a reusable VPC/subnet/routing/security-group module and remote-state intent stubbed |
+| Reusable module design beyond flat root configs | `iac/environments/dev/` consumes `iac/modules/network/` |
+| Tested application code beyond Bash/utility scripting | `tools/net-drift-check/` has pure comparison logic, CLI tests, and a pytest suite |
+| CI-gated infrastructure | `.github/workflows/ci.yml` runs formatting, validation, and pytest on pushes to `main` on the GitHub mirror |
 
 I picked *networking* on AWS on purpose: VPCs, subnets, routing, security groups. My home network currently runs on a UDM Pro and USW-24-PoE with a flat LAN. VLAN and firewall segmentation are planned there; this AWS lab explores those design questions without claiming they are deployed at home or in AWS.
 
@@ -28,9 +34,7 @@ tools/
 scripts/
   ci-local.sh           the same checks CI runs, runnable locally
 .github/workflows/
-  ci.yml                fmt + validate (IaC) and pytest (tool) on every push/PR
-docs/
-  why-this-exists.md    the honest gap-to-evidence mapping
+  ci.yml                fmt + validate (IaC) and pytest (tool) on mirrored pushes to main
 ```
 
 ## The IaC
@@ -62,7 +66,9 @@ python3 -m pytest -q          # tests
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every push/PR: `tofu fmt -check` + `validate`, and `pytest` for the tool. `scripts/ci-local.sh` runs the identical checks locally (and a pre-commit hook can call it). If GitHub-hosted runners aren't available in a given org, the local script is the enforcement path, the same pattern I use at work.
+Forgejo is the primary Git host; GitHub is a push mirror, and CI runs only on GitHub mirror push events.
+
+`.github/workflows/ci.yml` runs on pushes to `main` on that mirror: `tofu fmt -check` + `validate`, and `pytest` for the tool. `scripts/ci-local.sh` runs the identical checks locally (and a pre-commit hook can call it). If GitHub-hosted runners aren't available in a given org, the local script is the enforcement path, the same pattern I use at work.
 
 ## Evidence
 
@@ -71,6 +77,8 @@ The example command above reports a missing subnet, changed DNS, and security-gr
 ## Honesty
 
 This is a lab, and it says so. It demonstrates AWS IaC authoring, reusable module design, remote-state intent, CI-gated infrastructure, and tested Python automation. It does **not** claim production AWS operations at scale. The live homelab is separate; this AWS design has not been deployed.
+
+The drift checker is a focused utility rather than a product. Kubernetes deployment and continuous delivery are outside this lab's scope.
 
 No credentials, account IDs, or state files are committed (`*.tfvars`, `*.tfstate`, `.env` are gitignored; only `*.example` is tracked).
 
