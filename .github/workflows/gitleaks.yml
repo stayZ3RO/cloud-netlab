@@ -4,9 +4,6 @@ name: Secret scan
 # pull-requests: read, so scan every pushed branch instead.
 on:
   push:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 5 * * 1'
 
 permissions:
   contents: read
