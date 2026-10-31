@@ -1,0 +1,60 @@
+---
+name: Docs Check
+
+# Push only, never on pull requests. Copied from the dns repo's Forgejo
+# workflows so this repo runs its docs and hygiene checks on Forgejo and
+# not only on the GitHub mirror.
+
+on:
+  push:
+
+jobs:
+  docs-check:
+    name: Docs and repo hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: List Markdown files
+        run: |
+          set -euo pipefail
+          echo "Markdown files found:"
+          find . -name "*.md" | sort || true
+
+      - name: Check for obvious sensitive files
+        run: |
+          set -euo pipefail
+          echo "Checking for files that should not be committed..."
+          FOUND="$(find . \
+            -path "./.git" -prune -o \
+            \( \
+              -name ".env" -o \
+              -name ".env.local" -o \
+              -name ".env.production" -o \
+              -name ".env.*" -o \
+              -name "*.pem" -o \
+              -name "*.key" -o \
+              -name "*.p12" -o \
+              -name "*.pfx" -o \
+              -name "id_rsa" -o \
+              -name "id_ed25519" \
+            \) -print)"
+          if [ -n "$FOUND" ]; then
+            echo "Potential sensitive files found:"
+            echo "$FOUND"
+            exit 1
+          fi
+          echo "No obvious sensitive files found."
+
+      - name: Check for empty Markdown files
+        run: |
+          set -euo pipefail
+          EMPTY_MD="$(find . -name "*.md" -type f -empty -print)"
+          if [ -n "$EMPTY_MD" ]; then
+            echo "Empty Markdown files found:"
+            echo "$EMPTY_MD"
+            exit 1
+          fi
+          echo "No empty Markdown files found."

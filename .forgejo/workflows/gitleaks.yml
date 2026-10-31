@@ -1,0 +1,60 @@
+---
+name: Secret scan
+
+# Push only, never on pull requests. Forgejo runs this; the gitleaks GitHub
+# action needs a GitHub credential and the pull request API, so the
+# binary is fetched and run directly instead. Copied from the dns repo.
+
+on:
+  push:
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install tools
+        run: |
+          set -euo pipefail
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates \
+            curl \
+            git \
+            gzip \
+            tar
+
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          tools="$(mktemp -d "${RUNNER_TEMP:-/tmp}/forgejo-tools.XXXXXX")"
+          case "$(uname -m)" in
+            x86_64)
+              gitleaks_arch=x64
+              gitleaks_sha=551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+              ;;
+            aarch64|arm64)
+              gitleaks_arch=arm64
+              gitleaks_sha=e4a487ee7ccd7d3a7f7ec08657610aa3606637dab924210b3aee62570fb4b080
+              ;;
+            *)
+              echo "Unsupported architecture: $(uname -m)" >&2
+              exit 1
+              ;;
+          esac
+          curl -fsSL -o "$tools/gitleaks.tgz" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_${gitleaks_arch}.tar.gz"
+          printf '%s  %s\n' "$gitleaks_sha" "$tools/gitleaks.tgz" | sha256sum -c -
+          tar -xzf "$tools/gitleaks.tgz" -C "$tools" gitleaks
+          chmod +x "$tools/gitleaks"
+          printf '%s\n' "$tools" >> "$GITHUB_PATH"
+
+      - name: Secret scan
+        run: gitleaks git . --redact --no-banner
