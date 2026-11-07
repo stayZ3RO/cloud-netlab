@@ -66,7 +66,7 @@ python3 -m pytest -q          # tests
 
 ## CI
 
-Forgejo is the primary Git host; GitHub is a push mirror, and CI runs only on GitHub mirror push events.
+Forgejo is the primary Git host; GitHub is a push mirror, and CI runs on both. Forgejo runs a docs check and a secret scan on push; the GitHub mirror runs fmt, validate, pytest and gitleaks.
 
 `.github/workflows/ci.yml` runs on pushes to `main` on that mirror: `tofu fmt -check` + `validate`, and `pytest` for the tool. `scripts/ci-local.sh` runs the identical checks locally (and a pre-commit hook can call it). If GitHub-hosted runners aren't available in a given org, the local script is the enforcement path, the same pattern I use at work.
 
