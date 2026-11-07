@@ -6,7 +6,7 @@
 > - **Tech:** OpenTofu/Terraform (HCL), Python, pytest, GitHub Actions.
 > - **Testing:** 101 pytest cases on the drift tool (pure logic + CLI, including security-group rule drift); `tofu validate` on the IaC.
 > - **CI:** pushes to `main` on the GitHub mirror run `tofu fmt -check` + `validate` and `pytest` (green).
-> - **Security:** no credentials/state/tfvars committed (`*.example` only); baseline SG is deny-inbound/allow-egress.
+> - **Security:** no credentials/state/tfvars committed (`*.example` only); baseline SG is deny-inbound/allow-egress; gitleaks scans every pushed branch on both GitHub and Forgejo.
 > - **What was actually run:** Locally, `tofu fmt`, `init -backend=false`, `validate`, and the full pytest suite pass. CI runs formatting/validation checks and the pytest suite on pushes to `main` on the GitHub mirror. No cloud resources were applied.
 > - **Limitations (honest):** this is a **lab**. It demonstrates AWS IaC authoring, module design, and CI-gated testing; it does **not** represent production/enterprise AWS operations, multi-account architecture, or IAM/governance at scale.
 
