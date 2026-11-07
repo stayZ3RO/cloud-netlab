@@ -35,6 +35,10 @@ scripts/
   ci-local.sh           the same IaC and pytest checks as ci.yml, runnable locally
 .github/workflows/
   ci.yml                fmt + validate (IaC) and pytest (tool) on mirrored pushes to main
+  gitleaks.yml          secret scan on pushes
+.forgejo/workflows/
+  docs-check.yml        docs and hygiene checks on push
+  gitleaks.yml          secret scan on push
 ```
 
 ## The IaC
