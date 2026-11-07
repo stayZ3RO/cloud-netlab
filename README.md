@@ -32,7 +32,7 @@ iac/
 tools/
   net-drift-check/      tested Python CLI: compares desired vs actual network state, exits non-zero on drift
 scripts/
-  ci-local.sh           the same checks CI runs, runnable locally
+  ci-local.sh           the same IaC and pytest checks as ci.yml, runnable locally
 .github/workflows/
   ci.yml                fmt + validate (IaC) and pytest (tool) on mirrored pushes to main
 ```
@@ -68,7 +68,7 @@ python3 -m pytest -q          # tests
 
 Forgejo is the primary Git host; GitHub is a push mirror, and CI runs on both. Forgejo runs a docs check and a secret scan on push; the GitHub mirror runs fmt, validate, pytest and gitleaks.
 
-`.github/workflows/ci.yml` runs on pushes to `main` on that mirror: `tofu fmt -check` + `validate`, and `pytest` for the tool. `scripts/ci-local.sh` runs the identical checks locally (and a pre-commit hook can call it). If GitHub-hosted runners aren't available in a given org, the local script is the enforcement path, the same pattern I use at work.
+`.github/workflows/ci.yml` runs on pushes to `main` on that mirror: `tofu fmt -check` + `validate`, and `pytest` for the tool. `scripts/ci-local.sh` runs the same IaC and pytest checks as `ci.yml` locally (not gitleaks or the Forgejo hygiene checks) (and a pre-commit hook can call it). If GitHub-hosted runners aren't available in a given org, the local script is the enforcement path, the same pattern I use at work.
 
 ## Evidence
 

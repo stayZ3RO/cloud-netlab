@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run the same checks CI runs, locally. No AWS credentials required.
+# Run the same IaC and pytest checks as ci.yml, locally (no gitleaks or Forgejo checks). No AWS credentials required.
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
