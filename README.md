@@ -6,7 +6,7 @@
 > - **Tech:** OpenTofu/Terraform (HCL), Python, pytest, GitHub Actions.
 > - **Testing:** 101 pytest cases on the drift tool (pure logic + CLI, including security-group rule drift); `tofu validate` on the IaC.
 > - **CI:** pushes to `main` on the GitHub mirror run `tofu fmt -check` + `validate` and `pytest` (green).
-> - **Security:** no credentials/state/tfvars committed (`*.example` only); baseline SG is deny-inbound/allow-egress.
+> - **Security:** no credentials/state/tfvars committed (`*.example` only); baseline SG is deny-inbound/allow-egress; gitleaks scans every pushed branch on both GitHub and Forgejo.
 > - **What was actually run:** Locally, `tofu fmt`, `init -backend=false`, `validate`, and the full pytest suite pass. CI runs formatting/validation checks and the pytest suite on pushes to `main` on the GitHub mirror. No cloud resources were applied.
 > - **Limitations (honest):** this is a **lab**. It demonstrates AWS IaC authoring, module design, and CI-gated testing; it does **not** represent production/enterprise AWS operations, multi-account architecture, or IAM/governance at scale.
 
@@ -32,9 +32,13 @@ iac/
 tools/
   net-drift-check/      tested Python CLI: compares desired vs actual network state, exits non-zero on drift
 scripts/
-  ci-local.sh           the same checks CI runs, runnable locally
+  ci-local.sh           the same IaC and pytest checks as ci.yml, runnable locally
 .github/workflows/
   ci.yml                fmt + validate (IaC) and pytest (tool) on mirrored pushes to main
+  gitleaks.yml          secret scan on pushes
+.forgejo/workflows/
+  docs-check.yml        docs and hygiene checks on push
+  gitleaks.yml          secret scan on push
 ```
 
 ## The IaC
@@ -66,9 +70,9 @@ python3 -m pytest -q          # tests
 
 ## CI
 
-Forgejo is the primary Git host; GitHub is a push mirror, and CI runs only on GitHub mirror push events.
+Forgejo is the primary Git host; GitHub is a push mirror, and CI runs on both. Forgejo runs a docs check and a secret scan on push; the GitHub mirror runs fmt, validate, pytest and gitleaks.
 
-`.github/workflows/ci.yml` runs on pushes to `main` on that mirror: `tofu fmt -check` + `validate`, and `pytest` for the tool. `scripts/ci-local.sh` runs the identical checks locally (and a pre-commit hook can call it). If GitHub-hosted runners aren't available in a given org, the local script is the enforcement path, the same pattern I use at work.
+`.github/workflows/ci.yml` runs on pushes to `main` on that mirror: `tofu fmt -check` + `validate`, and `pytest` for the tool. `scripts/ci-local.sh` runs the same IaC and pytest checks as `ci.yml` locally (not gitleaks or the Forgejo hygiene checks) (and a pre-commit hook can call it). If GitHub-hosted runners aren't available in a given org, the local script is the enforcement path, the same pattern I use at work.
 
 ## Evidence
 
